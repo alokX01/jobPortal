@@ -13,23 +13,35 @@ dotenv.config();
 
 const app = express();
 
+// ✅ MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({ origin: true, credentials: true }));
 
+// ✅ LOCAL CORS (IMPORTANT)
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend port
+    credentials: true,
+  })
+);
+
+// ✅ TEST ROUTE
 app.get("/", (req, res) => {
-  res.send("Backend running locally");
+  res.send("Backend running on localhost");
 });
 
+// ✅ ROUTES
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
+// ✅ DB CONNECT
 connectDB();
 
+// ✅ SERVER START
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(` Backend running at http://localhost:${PORT}`);
 });
