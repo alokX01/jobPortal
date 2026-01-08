@@ -24,7 +24,7 @@ app.use(cookieParser());
 // ✅ LOCAL CORS (IMPORTANT)
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend port
+    origin: "https://job-search-pj1x.onrender.com", // frontend port
     credentials: true,
   })
 );
