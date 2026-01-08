@@ -1,3 +1,9 @@
-backend/.env
+# dependencies
+node_modules/
+
+# environment variables
 .env
-node_modules
+backend/.env
+
+# build
+dist/
