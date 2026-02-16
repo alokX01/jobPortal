@@ -32,6 +32,10 @@ job-portal/
 
 Create `.env` in project root and use `.env.example` as template.
 
+Quick split templates (recommended):
+- `backend/.env.example` for backend secrets
+- `frontend/.env.example` for frontend public env
+
 ## Local Setup
 
 Install dependencies:
@@ -69,6 +73,18 @@ VITE_API_BASE_URL=https://your-backend-domain/api/v1
 NODE_ENV=production
 FRONTEND_URL=https://your-vercel-domain.vercel.app
 ```
+
+What to add exactly:
+1. Vercel (Frontend Project -> Settings -> Environment Variables):
+`VITE_API_BASE_URL=https://<your-backend-domain>/api/v1`
+2. Render/Railway (Backend Service -> Environment):
+`NODE_ENV=production`
+`FRONTEND_URL=https://<your-vercel-project>.vercel.app`
+`MONGO_URI=<real value>`
+`SECRET_KEY=<real value>`
+`CLOUD_NAME=<real value>`
+`API_KEY=<real value>`
+`API_SECRET=<real value>`
 
 - In Vercel project settings:
 1. Root Directory: `frontend`
