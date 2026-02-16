@@ -4,14 +4,30 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
+const cookieOptions = {
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  // For Vercel(frontend) + Render/Railway(backend), cross-site cookie is required in production.
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+};
+
 // ============================ REGISTER ============================
 export const register = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
+    const allowedRoles = new Set(["student", "recruiter"]);
 
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
         message: "Something is missing",
+        success: false,
+      });
+    }
+
+    if (!allowedRoles.has(role)) {
+      return res.status(400).json({
+        message: "Invalid role selected.",
         success: false,
       });
     }
@@ -117,11 +133,7 @@ export const login = async (req, res) => {
 
     return res
       .status(200)
-      .cookie("token", token, {
-        maxAge: 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: "strict",
-      })
+      .cookie("token", token, cookieOptions)
       .json({
         message: `Welcome back ${user.fullname}`,
         user,
@@ -139,9 +151,14 @@ export const login = async (req, res) => {
 // logout
 export const logout = async (req, res) => {
   try {
+    const logoutCookieOptions = {
+      ...cookieOptions,
+      maxAge: 0,
+    };
+
     return res
       .status(200)
-      .cookie("token", "", { maxAge: 0 })
+      .cookie("token", "", logoutCookieOptions)
       .json({
         message: "Logged out successfully.",
         success: true,
@@ -193,7 +210,16 @@ export const updateProfile = async (req, res) => {
 
     // Update fields
     if (fullname) user.fullname = fullname;
-    if (email) user.email = email;
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          message: "Email is already in use.",
+          success: false,
+        });
+      }
+      user.email = email;
+    }
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio) user.profile.bio = bio;
     if (skills) user.profile.skills = skillsArray;

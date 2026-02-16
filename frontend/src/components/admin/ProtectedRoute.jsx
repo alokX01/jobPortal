@@ -6,34 +6,40 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   const { user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const [isAllowed, setIsAllowed] = useState(false);
 
   useEffect(() => {
-    // Not logged in → redirect to login
     if (!user) {
+      setIsAllowed(false);
+      setChecking(false);
       navigate("/login", { replace: true });
       return;
     }
 
-    // Wrong role → redirect to home
     if (allowedRole && user.role !== allowedRole) {
+      setIsAllowed(false);
+      setChecking(false);
       navigate("/", { replace: true });
       return;
     }
 
-    // All good → Done checking
+    setIsAllowed(true);
     setChecking(false);
-  }, [user, allowedRole, navigate]);
+  }, [allowedRole, navigate, user]);
 
-  // Small loader to prevent blank screen flash
   if (checking) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-blue-600 font-semibold">
-        Loading...
+        Checking access...
       </div>
     );
   }
 
-  return <>{children}</>;
+  if (!isAllowed) {
+    return null;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

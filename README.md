@@ -1,74 +1,85 @@
-# Job Search Portal – Full Stack Application
+# Job Portal
 
-A full-stack Job Search Portal built using React, Node.js, Express, and MongoDB.  
-This application provides a clean and modern interface for searching jobs and demonstrates real-world full-stack development practices.
+Full-stack job portal built with React, Express, MongoDB, Redux, and Cloudinary.
 
----
+## Project Structure
 
-## 🌐 Live Demo
-https://job-search-pj1x.onrender.com
+```text
+job-portal/
+  backend/
+    controllers/
+    middlewares/
+    models/
+    routes/
+    utils/
+    index.js
+  frontend/
+    src/
+    public/
+    package.json
+  .env.example
+  package.json
+```
 
----
+## Tech Stack
 
-## 📂 GitHub Repository
-https://github.com/alokX01/job-search
+- Frontend: React + Vite + Redux + Tailwind/shadcn UI
+- Backend: Node.js + Express + JWT + Multer
+- Database: MongoDB (Mongoose)
+- File Storage: Cloudinary
 
----
+## Environment Variables
 
-## 🧱 Tech Stack
+Create `.env` in project root and use `.env.example` as template.
 
-### Frontend
-- React
-- Vite
-- JavaScript (ES6+)
-- HTML5
-- CSS3
-- shadcn/ui (UI components)
+## Local Setup
 
-### Backend
-- Node.js
-- Express.js
+Install dependencies:
 
-### Database
-- MongoDB
-
-### Cloud & Storage
-- Cloudinary (image/file uploads)
-
-### Tools & Deployment
-- Git & GitHub
-- Render (deployment)
-
----
-
-## ✨ Features
-- Full-stack architecture (Frontend + Backend + Database)
-- Clean and modern UI using shadcn/ui
-- Job search functionality
-- RESTful API integration
-- MongoDB database integration
-- Cloudinary for media uploads
-- Beginner-friendly and scalable project structure
-- Deployed and accessible online
-
----
-
-## 📸 Project Overview
-This project was developed to gain hands-on experience with:
-- Building full-stack applications using React and Node.js
-- Designing REST APIs with Express
-- Integrating MongoDB for data persistence
-- Managing media uploads with Cloudinary
-- Using shadcn/ui for consistent and reusable UI components
-- Managing version control with Git and GitHub
-- Deploying a production-ready application
-
-The focus of this project is clarity, clean structure, and real-world development workflow rather than over-engineering.
-
----
-
-## 🚀 Getting Started (Run Locally)
-
-### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/alokX01/job-search.git
+npm install
+npm install --prefix frontend
+```
+
+Run backend:
+
+```bash
+npm run dev
+```
+
+Run frontend:
+
+```bash
+npm run dev --prefix frontend
+```
+
+## Deploy Notes
+
+- Frontend recommended on Vercel (`frontend` as root directory).
+- Backend can stay on Render/Railway.
+- Set frontend env:
+
+```env
+VITE_API_BASE_URL=https://your-backend-domain/api/v1
+```
+
+- Set backend env:
+
+```env
+NODE_ENV=production
+FRONTEND_URL=https://your-vercel-domain.vercel.app
+```
+
+- In Vercel project settings:
+1. Root Directory: `frontend`
+2. Framework Preset: `Vite`
+3. Build Command: `npm run build`
+4. Output Directory: `dist`
+
+## Security Improvements Included
+
+- Route-level auth + role checks
+- ObjectId validation for sensitive routes
+- Ownership checks for recruiter resources
+- Safe update payload handling
+- Multer file type and size restrictions

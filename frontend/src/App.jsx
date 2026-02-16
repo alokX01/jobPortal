@@ -13,6 +13,7 @@ import AdminJobs from "./components/admin/AdminJobs";
 import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
 import EditJob from "./components/admin/EditJob";
+import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 const appRouter = createBrowserRouter([
   {
@@ -47,33 +48,60 @@ const appRouter = createBrowserRouter([
   // Admin Routes
   {
     path: "/admin/companies",
-    element: <Companies />,
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <Companies />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/companies/create",
-    element: <CompanyCreate />,
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <CompanyCreate />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/companies/:id",
-    element: <CompanySetup />,
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <CompanySetup />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/jobs",
-    element: <AdminJobs />,
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <AdminJobs />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/jobs/create",
-    element: <PostJob />,
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <PostJob />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/jobs/:id/applicants",
-    element: <Applicants/>,
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <Applicants />
+      </ProtectedRoute>
+    ),
   },
   {
-  path: "/admin/jobs/:id/edit",
-  element: <EditJob/>,
-},
-
+    path: "/admin/jobs/:id/edit",
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <EditJob />
+      </ProtectedRoute>
+    ),
+  },
 
 ]);
 
