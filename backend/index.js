@@ -16,8 +16,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
-// Keep env loading stable even when server is started from the `backend` folder.
-dotenv.config({ path: path.resolve(projectRoot, ".env") });
+// We keep env loading flexible:
+// 1) root .env for normal project run
+// 2) backend/.env fallback when someone runs only backend folder
+const rootEnvPath = path.resolve(projectRoot, ".env");
+const backendEnvPath = path.resolve(__dirname, ".env");
+if (fs.existsSync(rootEnvPath)) {
+  dotenv.config({ path: rootEnvPath });
+} else {
+  dotenv.config({ path: backendEnvPath });
+}
 
 const app = express();
 
@@ -27,6 +35,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
   "https://job-search-pj1x.onrender.com",
   process.env.FRONTEND_URL,
 ]
@@ -38,7 +47,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server tools and local requests without origin header.
+      // Allow server-to-server calls (no origin) and known frontend domains.
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -54,6 +63,8 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
 app.use((error, req, res, next) => {
+  if (!error) return next();
+
   if (error?.message?.includes("CORS policy")) {
     return res.status(403).json({
       message: "Request blocked by CORS policy.",
@@ -68,21 +79,15 @@ app.use((error, req, res, next) => {
     });
   }
 
-  if (error) {
-    return res.status(500).json({
-      message: error.message || "Unexpected server error.",
-      success: false,
-    });
-  }
-
-  next();
+  return res.status(500).json({
+    message: error.message || "Unexpected server error.",
+    success: false,
+  });
 });
 
+// Keep old single-service deploy behavior only when frontend build exists.
 const frontendDistPath = path.join(projectRoot, "frontend", "dist");
-const hasFrontendBuild = fs.existsSync(frontendDistPath);
-
-// Keep old all-in-one deployment support, but only if dist actually exists.
-if (hasFrontendBuild) {
+if (fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));
   app.use((req, res) => {
     res.sendFile(path.resolve(frontendDistPath, "index.html"));

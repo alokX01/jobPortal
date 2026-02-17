@@ -11,6 +11,7 @@ const escapeRegex = (text = "") => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const postJob = async (req, res) => {
   try {
+    // Keep only fields we expect from client payload.
     const rawPayload = pickAllowedFields(req.body, [
       "title",
       "description",
@@ -59,6 +60,7 @@ export const postJob = async (req, res) => {
       });
     }
 
+    // Recruiter can post only under their own company.
     const company = await Company.findOne({
       _id: payload.companyId,
       userId: req.id,

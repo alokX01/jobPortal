@@ -9,6 +9,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   const [isAllowed, setIsAllowed] = useState(false);
 
   useEffect(() => {
+    // If user is not logged in, send to login page.
     if (!user) {
       setIsAllowed(false);
       setChecking(false);
@@ -16,6 +17,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
       return;
     }
 
+    // If role does not match admin/student route rule, block page.
     if (allowedRole && user.role !== allowedRole) {
       setIsAllowed(false);
       setChecking(false);
@@ -35,9 +37,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
     );
   }
 
-  if (!isAllowed) {
-    return null;
-  }
+  if (!isAllowed) return null;
 
   return children;
 };

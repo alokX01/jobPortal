@@ -3,6 +3,8 @@ import { User } from "../models/user.model.js";
 const requireRole = (...allowedRoles) => {
   return async (req, res, next) => {
     try {
+      // We read role from DB on every protected admin action.
+      // This avoids trusting stale frontend role values.
       const user = await User.findById(req.id).select("role");
 
       if (!user) {

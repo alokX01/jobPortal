@@ -51,6 +51,7 @@ export const applyJob = async (req, res) => {
 export const getAppliedJobs = async (req, res) => {
   try {
     const userId = req.id;
+
     const application = await Application.find({ applicant: userId })
       .sort({ createdAt: -1 })
       .populate({
@@ -93,6 +94,7 @@ export const getApplicants = async (req, res) => {
       });
     }
 
+    // Only job owner recruiter can view applicant list.
     if (job.created_by.toString() !== req.id) {
       return res.status(403).json({
         message: "You can only view applicants for your own jobs.",
@@ -132,6 +134,7 @@ export const updateStatus = async (req, res) => {
       });
     }
 
+    // Status change is restricted to the recruiter who owns that job.
     if (!application.job || application.job.created_by.toString() !== req.id) {
       return res.status(403).json({
         message: "You can only update applicants for your own jobs.",

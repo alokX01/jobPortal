@@ -16,36 +16,15 @@ import EditJob from "./components/admin/EditJob";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 const appRouter = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/signup",
-    element: <Signup />,
-  },
-  {
-    path: "/jobs",
-    element: <Jobs />,
-  },
-  {
-    path: "/description/:id",
-    element: <JobDescription />,
-  },
-  {
-    path: "/browse",
-    element: <Browse />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
+  { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
+  { path: "/jobs", element: <Jobs /> },
+  { path: "/description/:id", element: <JobDescription /> },
+  { path: "/browse", element: <Browse /> },
+  { path: "/profile", element: <Profile /> },
 
-  // Admin Routes
+  // We keep admin URLs behind recruiter check.
   {
     path: "/admin/companies",
     element: (
@@ -102,7 +81,6 @@ const appRouter = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
 ]);
 
 function App() {

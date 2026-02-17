@@ -8,11 +8,10 @@ const cookieOptions = {
   maxAge: 24 * 60 * 60 * 1000,
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  // For Vercel(frontend) + Render/Railway(backend), cross-site cookie is required in production.
+  // Cross-site cookie is required when frontend and backend are on different domains.
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 };
 
-// ============================ REGISTER ============================
 export const register = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
@@ -32,31 +31,25 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        message: "User already exist with this email.",
+        message: "User already exists with this email.",
         success: false,
       });
     }
 
-    // Upload image
-    const file = req.file;
     let profilePhotoUrl = "";
-
-    if (file) {
-      const fileUri = getDataUri(file);
+    if (req.file) {
+      const fileUri = getDataUri(req.file);
       const cloud = await cloudinary.uploader.upload(fileUri.content, {
         folder: "job-portal/profilePhotos",
       });
       profilePhotoUrl = cloud.secure_url;
     }
 
-    // Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     await User.create({
       fullname,
       email,
@@ -73,7 +66,6 @@ export const register = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: "Server error",
       success: false,
@@ -81,7 +73,6 @@ export const register = async (req, res) => {
   }
 };
 
-//  LOGIN
 export const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -111,17 +102,16 @@ export const login = async (req, res) => {
 
     if (role !== user.role) {
       return res.status(400).json({
-        message: "Account doesn't exist with this role.",
+        message: "Account does not exist with this role.",
         success: false,
       });
     }
 
-    // JWT Token
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
       expiresIn: "1d",
     });
 
-    // Formatting user object
+    // Keep response payload simple and avoid sending password.
     user = {
       _id: user._id,
       fullname: user.fullname,
@@ -140,7 +130,6 @@ export const login = async (req, res) => {
         success: true,
       });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: "Server error",
       success: false,
@@ -148,23 +137,16 @@ export const login = async (req, res) => {
   }
 };
 
-// logout
 export const logout = async (req, res) => {
   try {
-    const logoutCookieOptions = {
-      ...cookieOptions,
-      maxAge: 0,
-    };
-
     return res
       .status(200)
-      .cookie("token", "", logoutCookieOptions)
+      .cookie("token", "", { ...cookieOptions, maxAge: 0 })
       .json({
         message: "Logged out successfully.",
         success: true,
       });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: "Server error",
       success: false,
@@ -172,15 +154,12 @@ export const logout = async (req, res) => {
   }
 };
 
-//  UPDATE PROFILE 
 export const updateProfile = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
-    const file = req.file;
+    const userId = req.id;
 
-    const userId = req.id; // from auth middleware
     let user = await User.findById(userId);
-
     if (!user) {
       return res.status(404).json({
         message: "User not found.",
@@ -188,28 +167,21 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Upload resume or new profile image
     let cloudResponse = null;
-    if (file) {
-      const fileUri = getDataUri(file);
-
+    if (req.file) {
+      const fileUri = getDataUri(req.file);
       cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
-        resource_type: file.mimetype === "application/pdf" ? "raw" : "image",
-        folder: file.mimetype === "application/pdf" 
-          ? "job-portal/resumes" 
-          : "job-portal/profilePhotos",
-        public_id: `${Date.now()}_${file.originalname.replace(/\s/g, "_")}`,
+        resource_type: req.file.mimetype === "application/pdf" ? "raw" : "image",
+        folder:
+          req.file.mimetype === "application/pdf"
+            ? "job-portal/resumes"
+            : "job-portal/profilePhotos",
+        public_id: `${Date.now()}_${req.file.originalname.replace(/\s/g, "_")}`,
       });
     }
 
-    // Prepare skills
-    let skillsArray = [];
-    if (skills) {
-      skillsArray = skills.split(",").map((s) => s.trim());
-    }
-
-    // Update fields
     if (fullname) user.fullname = fullname;
+
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -220,15 +192,15 @@ export const updateProfile = async (req, res) => {
       }
       user.email = email;
     }
+
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio) user.profile.bio = bio;
-    if (skills) user.profile.skills = skillsArray;
+    if (skills) user.profile.skills = skills.split(",").map((s) => s.trim());
 
-    // Update resume or profile photo
     if (cloudResponse) {
-      if (file.mimetype === "application/pdf") {
+      if (req.file.mimetype === "application/pdf") {
         user.profile.resume = cloudResponse.secure_url;
-        user.profile.resumeOriginalName = file.originalname;
+        user.profile.resumeOriginalName = req.file.originalname;
       } else {
         user.profile.profilePhoto = cloudResponse.secure_url;
       }
@@ -251,7 +223,6 @@ export const updateProfile = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log("❌ Upload Error:", error);
     return res.status(500).json({
       message: "Failed to update profile",
       success: false,

@@ -42,8 +42,7 @@ export const registerCompany = async (req, res) => {
 
 export const getCompany = async (req, res) => {
   try {
-    const userId = req.id;
-    const companies = await Company.find({ userId });
+    const companies = await Company.find({ userId: req.id });
 
     return res.status(200).json({
       companies,
@@ -60,8 +59,9 @@ export const getCompany = async (req, res) => {
 export const getCompanyById = async (req, res) => {
   try {
     const companyId = req.params.id;
-    const company = await Company.findOne({ _id: companyId, userId: req.id });
 
+    // Return only if current recruiter owns this company.
+    const company = await Company.findOne({ _id: companyId, userId: req.id });
     if (!company) {
       return res.status(404).json({
         message: "Company not found.",
@@ -83,6 +83,7 @@ export const getCompanyById = async (req, res) => {
 
 export const updateCompany = async (req, res) => {
   try {
+    // Keep updates limited to known fields only.
     const safeBody = pickAllowedFields(req.body, [
       "name",
       "description",
@@ -97,16 +98,14 @@ export const updateCompany = async (req, res) => {
       location: toTrimmedString(safeBody.location),
     };
 
-    // Drop undefined values so we only update user-provided fields.
     Object.keys(updateData).forEach((key) => {
       if (updateData[key] === undefined) {
         delete updateData[key];
       }
     });
 
-    const file = req.file;
-    if (file) {
-      const fileUri = getDataUri(file);
+    if (req.file) {
+      const fileUri = getDataUri(req.file);
       const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
       updateData.logo = cloudResponse.secure_url;
     }

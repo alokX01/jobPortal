@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken";
 
 const isAuthenticated = async (req, res, next) => {
   try {
+    // We store login token in cookie, so every protected request checks it first.
     const token = req.cookies.token;
+
     if (!token) {
       return res.status(401).json({
         message: "User not authenticated",
@@ -18,6 +20,7 @@ const isAuthenticated = async (req, res, next) => {
       });
     }
 
+    // Attach current user id so controllers can apply owner/role checks.
     req.id = decoded.userId;
     next();
   } catch (error) {
@@ -27,4 +30,5 @@ const isAuthenticated = async (req, res, next) => {
     });
   }
 };
+
 export default isAuthenticated;
