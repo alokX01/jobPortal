@@ -62,8 +62,6 @@ A production-ready **MERN Stack Job Portal Application** where candidates can ex
 
 ---
 
-## 📁 Project Structure
-
 jobPortal/
 │
 ├── backend/
@@ -87,7 +85,6 @@ jobPortal/
 ├── package.json
 └── README.md
 
----
 
 ## ⚙️ Environment Variables
 
