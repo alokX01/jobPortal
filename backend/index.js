@@ -47,7 +47,9 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const isVercelPreview = origin?.endsWith(".vercel.app");
+
+      if (!origin || allowedOrigins.includes(origin) || isVercelPreview) {
         return callback(null, true);
       }
       return callback(new Error("CORS policy blocked this origin"));

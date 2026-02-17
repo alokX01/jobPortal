@@ -12,10 +12,13 @@ import {
 
 const router = express.Router();
 
+// Public routes: user should be able to browse jobs without login.
+router.route("/get").get(getAllJobs);
+router.route("/get/:id").get(validateObjectId("id"), getJobById);
+
+// Recruiter-only routes.
 router.route("/post").post(isAuthenticated, requireRole("recruiter"), postJob);
-router.route("/get").get(isAuthenticated, getAllJobs);
 router.route("/getadminjobs").get(isAuthenticated, requireRole("recruiter"), getAdminJobs);
-router.route("/get/:id").get(isAuthenticated, validateObjectId("id"), getJobById);
 router
   .route("/update/:id")
   .put(isAuthenticated, requireRole("recruiter"), validateObjectId("id"), updateJob);
