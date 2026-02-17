@@ -11,14 +11,12 @@ import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
+import { cleanEnvValue } from "./utils/env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
-// We keep env loading flexible:
-// 1) root .env for normal project run
-// 2) backend/.env fallback when someone runs only backend folder
 const rootEnvPath = path.resolve(projectRoot, ".env");
 const backendEnvPath = path.resolve(__dirname, ".env");
 if (fs.existsSync(rootEnvPath)) {
@@ -33,11 +31,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+const frontendUrlFromEnv = cleanEnvValue(process.env.FRONTEND_URL);
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "https://job-search-pj1x.onrender.com",
-  process.env.FRONTEND_URL,
+  frontendUrlFromEnv,
 ]
   .filter(Boolean)
   .flatMap((origin) => origin.split(","))
@@ -47,7 +47,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server calls (no origin) and known frontend domains.
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -85,7 +84,6 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Keep old single-service deploy behavior only when frontend build exists.
 const frontendDistPath = path.join(projectRoot, "frontend", "dist");
 if (fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));

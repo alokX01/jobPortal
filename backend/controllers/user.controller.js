@@ -3,14 +3,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
+import { cleanEnvValue, isProduction } from "../utils/env.js";
 
-const cookieOptions = {
+const getCookieOptions = () => ({
   maxAge: 24 * 60 * 60 * 1000,
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  // Cross-site cookie is required when frontend and backend are on different domains.
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-};
+  secure: isProduction(),
+  sameSite: isProduction() ? "none" : "lax",
+});
 
 export const register = async (req, res) => {
   try {
@@ -18,17 +18,11 @@ export const register = async (req, res) => {
     const allowedRoles = new Set(["student", "recruiter"]);
 
     if (!fullname || !email || !phoneNumber || !password || !role) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      });
+      return res.status(400).json({ message: "Something is missing", success: false });
     }
 
     if (!allowedRoles.has(role)) {
-      return res.status(400).json({
-        message: "Invalid role selected.",
-        success: false,
-      });
+      return res.status(400).json({ message: "Invalid role selected.", success: false });
     }
 
     const existingUser = await User.findOne({ email });
@@ -56,20 +50,12 @@ export const register = async (req, res) => {
       phoneNumber,
       password: hashedPassword,
       role,
-      profile: {
-        profilePhoto: profilePhotoUrl,
-      },
+      profile: { profilePhoto: profilePhotoUrl },
     });
 
-    return res.status(201).json({
-      message: "Account created successfully.",
-      success: true,
-    });
+    return res.status(201).json({ message: "Account created successfully.", success: true });
   } catch (error) {
-    return res.status(500).json({
-      message: "Server error",
-      success: false,
-    });
+    return res.status(500).json({ message: "Server error", success: false });
   }
 };
 
@@ -78,26 +64,17 @@ export const login = async (req, res) => {
     const { email, password, role } = req.body;
 
     if (!email || !password || !role) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      });
+      return res.status(400).json({ message: "Something is missing", success: false });
     }
 
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({
-        message: "Incorrect email or password.",
-        success: false,
-      });
+      return res.status(400).json({ message: "Incorrect email or password.", success: false });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({
-        message: "Incorrect email or password.",
-        success: false,
-      });
+      return res.status(400).json({ message: "Incorrect email or password.", success: false });
     }
 
     if (role !== user.role) {
@@ -107,11 +84,12 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { userId: user._id },
+      cleanEnvValue(process.env.SECRET_KEY),
+      { expiresIn: "1d" }
+    );
 
-    // Keep response payload simple and avoid sending password.
     user = {
       _id: user._id,
       fullname: user.fullname,
@@ -123,17 +101,10 @@ export const login = async (req, res) => {
 
     return res
       .status(200)
-      .cookie("token", token, cookieOptions)
-      .json({
-        message: `Welcome back ${user.fullname}`,
-        user,
-        success: true,
-      });
+      .cookie("token", token, getCookieOptions())
+      .json({ message: `Welcome back ${user.fullname}`, user, success: true });
   } catch (error) {
-    return res.status(500).json({
-      message: "Server error",
-      success: false,
-    });
+    return res.status(500).json({ message: "Server error", success: false });
   }
 };
 
@@ -141,16 +112,10 @@ export const logout = async (req, res) => {
   try {
     return res
       .status(200)
-      .cookie("token", "", { ...cookieOptions, maxAge: 0 })
-      .json({
-        message: "Logged out successfully.",
-        success: true,
-      });
+      .cookie("token", "", { ...getCookieOptions(), maxAge: 0 })
+      .json({ message: "Logged out successfully.", success: true });
   } catch (error) {
-    return res.status(500).json({
-      message: "Server error",
-      success: false,
-    });
+    return res.status(500).json({ message: "Server error", success: false });
   }
 };
 
@@ -161,10 +126,7 @@ export const updateProfile = async (req, res) => {
 
     let user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({
-        message: "User not found.",
-        success: false,
-      });
+      return res.status(404).json({ message: "User not found.", success: false });
     }
 
     let cloudResponse = null;
@@ -185,10 +147,7 @@ export const updateProfile = async (req, res) => {
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        return res.status(400).json({
-          message: "Email is already in use.",
-          success: false,
-        });
+        return res.status(400).json({ message: "Email is already in use.", success: false });
       }
       user.email = email;
     }
@@ -223,9 +182,6 @@ export const updateProfile = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Failed to update profile",
-      success: false,
-    });
+    return res.status(500).json({ message: "Failed to update profile", success: false });
   }
 };
