@@ -1,42 +1,71 @@
-# JobPortal
+# 🚀 JobPortal – Full Stack MERN Job Portal
 
-A full-stack MERN Job Portal application where users can register, log in, explore jobs, apply to jobs, and recruiters/admins can post and manage jobs/companies.
+A production-ready **MERN Stack Job Portal Application** where candidates can explore & apply for jobs, and recruiters can post and manage jobs and companies.
 
-Live Frontend: https://job-portal-pink-pi.vercel.app
-
----
-
-## Tech Stack
-
-- Frontend: React, Vite, Redux Toolkit, Axios, Tailwind CSS
-- Backend: Node.js, Express.js, MongoDB, Mongoose
-- Auth: JWT + HTTP-only cookies
-- Media/File Upload: Cloudinary
-- Deployment:
-  - Frontend: Vercel
-  - Backend: Railway
-  - Database: MongoDB Atlas
+🌐 **Live Frontend:** https://job-portal-pink-pi.vercel.app  
 
 ---
 
-## Main Features
+## ✨ Features
 
-- User signup/login/logout
-- Role-based access (candidate/recruiter/admin style flows)
-- Protected routes for authorized users only
-- Job listing and job details
+### 👤 Authentication & Authorization
+- JWT-based authentication
+- HTTP-only secure cookies
+- Role-based access control (Candidate / Recruiter)
+- Protected routes using middleware
+
+### 🧑‍💼 Candidate Flow
+- Signup / Login / Logout
+- Browse all available jobs (public access supported)
+- View job details
 - Apply to jobs
-- Recruiter job posting and management
-- Company creation and management
-- Secure middleware-based auth checks
-- CORS + cookie-based cross-origin support
+- Track applied jobs
+
+### 🏢 Recruiter Flow
+- Create & manage company profiles
+- Post new jobs
+- Update & delete jobs
+- View applicants
+
+### 🔒 Security
+- Middleware-based route protection
+- Secure JWT implementation
+- CORS configuration with credentials support
+- Environment-based config system
+- Cloudinary file upload integration
 
 ---
 
-## Project Structure
+## 🛠 Tech Stack
 
-```bash
+### Frontend
+- React (Vite)
+- Redux Toolkit
+- Axios
+- Tailwind CSS
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB (Mongoose)
+
+### Authentication
+- JWT + HTTP-only cookies
+
+### File Upload
+- Cloudinary
+
+### Deployment
+- Frontend → Vercel  
+- Backend → Railway  
+- Database → MongoDB Atlas  
+
+---
+
+## 📁 Project Structure
+
 jobPortal/
+│
 ├── backend/
 │   ├── controllers/
 │   ├── middlewares/
@@ -44,6 +73,7 @@ jobPortal/
 │   ├── routes/
 │   ├── utils/
 │   └── index.js
+│
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
@@ -52,106 +82,117 @@ jobPortal/
 │   │   └── App.jsx
 │   ├── .env.example
 │   └── package.json
+│
 ├── .env.example
 ├── package.json
 └── README.md
---------------------------------------------
 
-Environment Variables
-Create .env in project root (backend env):
+---
 
-PORT=8000
-MONGO_URI=your_mongodb_connection_string
-SECRET_KEY=your_jwt_secret
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-CLOUD_NAME=your_cloudinary_cloud_name
-API_KEY=your_cloudinary_api_key
-API_SECRET=your_cloudinary_api_secret
+## ⚙️ Environment Variables
 
+### Backend (.env)
 
-Create frontend/.env:
-VITE_API_BASE_URL=http://localhost:8000/api/v1
+PORT=8000  
+MONGO_URI=your_mongodb_connection_string  
+SECRET_KEY=your_jwt_secret  
+NODE_ENV=development  
+FRONTEND_URL=http://localhost:5173  
+CLOUD_NAME=your_cloudinary_cloud_name  
+API_KEY=your_cloudinary_api_key  
+API_SECRET=your_cloudinary_api_secret  
 
+---
 
-Production frontend env (Vercel):
+### Frontend (frontend/.env)
 
-VITE_API_BASE_URL=https://your-railway-backend-domain/api/v1
+VITE_API_BASE_URL=http://localhost:8000/api/v1  
 
-Local Setup
-1. Clone repo
+---
 
-git clone https://github.com/alokX01/jobPortal.git
-cd jobPortal
+### Production Frontend (Vercel)
 
+VITE_API_BASE_URL=https://your-backend.up.railway.app/api/v1  
 
-2. Install dependencies
-npm install
-npm install --prefix frontend
-3. Add env files
-Root: .env
-Frontend: frontend/.env
-4. Run backend
-npm run dev
+---
 
-Frontend runs on http://localhost:5173
-Backend runs on http://localhost:8000
+## 🖥 Local Setup
 
+### 1️⃣ Clone the repository
 
-API Base Path
-All backend routes are under:
+git clone https://github.com/alokX01/jobPortal.git  
+cd jobPortal  
 
-/api/v1
-Example groups:
+### 2️⃣ Install dependencies
 
-/api/v1/user/*
-/api/v1/job/*
-/api/v1/company/*
-/api/v1/application/*
+npm install  
+npm install --prefix frontend  
 
-Deployment Guide
-Backend on Railway
-Connect GitHub repo alokX01/jobPortal
-Keep root directory as repo root (or set correctly if using custom)
-Add service variables (same as backend .env)
-Start command:
-npm run start
-Ensure FRONTEND_URL is your Vercel domain (exact URL)
-Deploy and copy backend domain
-Example backend URL:
-https://your-backend.up.railway.app
+### 3️⃣ Add Environment Files
 
+Create `.env` in root  
+Create `.env` in `frontend/`  
 
-Frontend on Vercel
-Import same GitHub repo
-Recommended root directory: frontend
-Build command: npm run build
-Output directory: dist
-Add env variable:
-VITE_API_BASE_URL=https://your-backend.up.railway.app/api/v1
-Redeploy
+### 4️⃣ Run Development Servers
 
-Common Issues & Fix
-Mongoose uri undefined:
-MONGO_URI missing or wrong in backend env.
-CORS blocked:
-FRONTEND_URL in backend must match actual frontend domain exactly.
-User not authenticated:
-Login cookie not set or cross-origin cookie config mismatch.
-Confirm frontend calls correct backend URL (VITE_API_BASE_URL).
-vite not recognized:
-run npm install --prefix frontend first.
-Security Notes
-Never commit real .env secrets.
-Keep .env in .gitignore.
-Rotate secrets if exposed.
-Use strong JWT secret and limited CORS origins.
-Built secure role-based MERN platform with JWT auth and protected APIs.
-Implemented recruiter/candidate workflows (job posting + applying).
-Deployed production frontend and backend on separate cloud platforms.
-Managed environment-based configuration and cross-origin cookie auth.
+npm run dev  
 
+Frontend → http://localhost:5173  
+Backend → http://localhost:8000  
 
-Author
-Alok Kumar
-GitHub: https://github.com/alokX01
+---
+
+## 🔌 API Base Path
+
+All backend routes are prefixed with:
+
+/api/v1  
+
+Main Route Groups:
+
+/api/v1/user/*  
+/api/v1/job/*  
+/api/v1/company/*  
+/api/v1/application/*  
+
+---
+
+## 🚀 Deployment Guide
+
+### Backend (Railway)
+
+1. Connect GitHub repo  
+2. Add environment variables  
+3. Start command: npm run start  
+4. Set FRONTEND_URL to Vercel domain  
+5. Deploy  
+
+---
+
+### Frontend (Vercel)
+
+1. Set root directory → frontend  
+2. Build command → npm run build  
+3. Output directory → dist  
+4. Add env variable → VITE_API_BASE_URL  
+5. Redeploy  
+
+---
+
+## 🔐 Security Notes
+
+- Never commit .env files  
+- Rotate exposed secrets  
+- Use strong JWT secret  
+- Restrict CORS origins  
+
+---
+
+## 👨‍💻 Author
+
+Alok Kumar  
+GitHub: https://github.com/alokX01  
+
+---
+
+⭐ If you like this project, give it a star!
